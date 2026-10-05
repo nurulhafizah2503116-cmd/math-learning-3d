@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Learning - Bangun Ruang Sisi Lengkung</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .shape-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .shape-btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      color: #333;
+    }
+
+    .shape-btn:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .shape-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 400px;
+      border-radius: 10px;
+      background: linear-gradient(to bottom, #e3f2fd, #f5f5f5);
+      border: 1px solid #ddd;
+    }
+
+    .zoom-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .zoom-btn {
+      padding: 10px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      color: #333;
+    }
+
+    .zoom-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .zoom-btn.active {
+      background: #764ba2;
+      color: white;
+      border-color: #764ba2;
+    }
+
+    .info-box {
+      background: white;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .info-box h3 {
+      color: #667eea;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+    }
+
+    .info-box p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 10px;
+      font-size: 0.95em;
+    }
+
+    .formula {
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #856404;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .quiz-header h2 {
+      color: #667eea;
+      margin: 0;
+      border: none;
+      padding: 0;
+    }
+
+    .progress-bar {
+      background: #ddd;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .progress-fill {
+      background: #667eea;
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .question-number {
+      color: #999;
+      font-size: 0.9em;
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .difficulty-easy {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .difficulty-medium {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .difficulty-hard {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .question h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+      line-height: 1.5;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 15px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+    }
+
+    .option:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .option input[type="radio"] {
+      margin-right: 12px;
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+    }
+
+    .option.correct {
+      background: #d4edda;
+      border-color: #28a745;
+    }
+
+    .option.incorrect {
+      background: #f8d7da;
+      border-color: #dc3545;
+    }
+
+    .feedback {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.correct {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      color: #155724;
+    }
+
+    .feedback.incorrect {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+      color: #721c24;
+    }
+
+    .solution-steps {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid currentColor;
+      font-size: 0.95em;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1em;
+      transition: all 0.3s;
+      margin-top: 15px;
+    }
+
+    .btn-primary:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .qr-section {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr-section h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    #qrCode {
+      display: inline-block;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .session-id {
+      background: #f0f4ff;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .results {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .results h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+    }
+
+    .score-display {
+      font-size: 3em;
+      color: #667eea;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .score-display.excellent {
+      color: #28a745;
+    }
+
+    .score-display.good {
+      color: #667eea;
+    }
+
+    .score-display.fair {
+      color: #ffc107;
+    }
+
+    .score-display.poor {
+      color: #dc3545;
+    }
+
+    .message {
+      font-size: 1.2em;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 Math Learning</h1>
+      <p>Pembelajaran Interaktif Bangun Ruang Sisi Lengkung Kelas 9</p>
+    </div>
+
+    <div class="main-content">
+      <div class="section">
+        <h2>📐 Visualisasi 3D Interaktif</h2>
+        <div class="shape-selector">
+          <button class="shape-btn active" onclick="selectShape('cylinder')">Tabung</button>
+          <button class="shape-btn" onclick="selectShape('cone')">Kerucut</button>
+          <button class="shape-btn" onclick="selectShape('sphere')">Bola</button>
+        </div>
+        <canvas id="canvas"></canvas>
+        <div class="zoom-controls" id="zoomControls">
+          <!-- Tombol zoom akan di-generate dinamis sesuai shape -->
+        </div>
+        <div class="info-box">
+          <h3 id="partTitle">Pilih bagian untuk mempelajari</h3>
+          <p id="partDescription">Klik salah satu tombol di atas untuk mempelajari konsep dan rumus bagian tertentu.</p>
+          <div id="formulaBox" class="formula" style="display:none;"></div>
+          <div id="conceptBox" style="display:none; margin-top: 15px; padding: 15px; background: #e7f3ff; border-radius: 8px; border-left: 4px solid #2196F3;">
+            <h4 style="color: #1976D2; margin-bottom: 8px;">📚 Penjelasan Konsep:</h4>
+            <p id="conceptText" style="color: #333; line-height: 1.6;"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="quiz-header">
+          <h2>❓ Latihan Soal</h2>
+          <div class="question-number" id="questionCounter">Soal 1 dari 10</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div id="quizContainer">
+          <div id="quizContent"></div>
+          <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Lanjut</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <h2>📱 Bagikan dengan QR Code</h2>
+      <p>Scan kode QR di bawah untuk membuka aplikasi ini dengan soal yang berbeda setiap kali!</p>
+      <div id="qrCode"></div>
+      <div class="session-id">
+        Kode Sesi: <span id="sessionCode">-</span>
+      </div>
+      <button class="btn-primary" onclick="generateNewQR()">Buat QR Baru</button>
+    </div>
+
+    <div class="results hidden" id="resultsSection">
+      <h2>✅ Hasil Akhir</h2>
+      <div class="score-display" id="scoreDisplay">0/10</div>
+      <div class="message" id="resultMessage"></div>
+      <button class="btn-primary" onclick="resetQuiz()">Mulai Ulang Quiz</button>
+    </div>
+  </div>
+
+  <script>
+    // ====== KONFIGURASI PEMBELAJARAN ======
+    const shapeData = {
+      cylinder: {
+        name: 'Tabung',
+        parts: ['alas', 'tutup', 'selimut'],
+        info: {
+          alas: {
+            title: '📍 Alas Tabung',
+            description: 'Alas tabung adalah bidang datar berbentuk lingkaran.',
+            concept: 'Alas tabung adalah permukaan bawah tabung yang berbentuk lingkaran sempurna. Bentuk ini sama dengan tutup tabung.',
+            formula: 'Luas Alas = πr²',
+            formulaExplain: 'π (phi ≈ 22/7 atau 3,14) adalah konstanta untuk lingkaran. r adalah jari-jari alas. Rumus ini sama dengan rumus luas lingkaran karena alas tabung adalah lingkaran.'
+          },
+          tutup: {
+            title: '🔝 Tutup Tabung',
+            description: 'Tutup tabung adalah bidang datar berbentuk lingkaran di bagian atas.',
+            concept: 'Tutup tabung adalah permukaan atas tabung yang juga berbentuk lingkaran. Ukurannya sama persis dengan alas.',
+            formula: 'Luas Tutup = πr²',
+            formulaExplain: 'Tutup tabung memiliki rumus yang sama dengan alas karena keduanya adalah lingkaran dengan jari-jari yang sama.'
+          },
+          selimut: {
+            title: '🔄 Selimut Tabung',
+            description: 'Selimut tabung adalah permukaan lengkung yang mengelilingi tabung.',
+            concept: 'Selimut tabung adalah sisi melengkung yang menghubungkan alas dan tutup. Jika dibuka/dikembangkan, selimut tabung akan membentuk persegi panjang.',
+            formula: 'Luas Selimut = 2πrt',
+            formulaExplain: 'Bagaimana mendapatkan rumus ini? Jika selimut tabung dilepas dan diluruskan, panjangnya sama dengan keliling lingkaran (2πr) dan lebarnya adalah tinggi tabung (t). Jadi luas selimut = 2πr × t = 2πrt.'
+          }
+        }
+      },
+      cone: {
+        name: 'Kerucut',
+        parts: ['alas', 'selimut', 'garis-pelukis'],
+        info: {
+          alas: {
+            title: '📍 Alas Kerucut',
+            description: 'Alas kerucut adalah bidang datar berbentuk lingkaran di bagian bawah.',
+            concept: 'Alas kerucut adalah permukaan bawah kerucut yang berbentuk lingkaran sempurna. Ini adalah satu-satunya bidang datar pada kerucut.',
+            formula: 'Luas Alas = πr²',
+            formulaExplain: 'Sama seperti alas tabung, alas kerucut juga berbentuk lingkaran, sehingga menggunakan rumus luas lingkaran πr².'
+          },
+          selimut: {
+            title: '🔄 Selimut Kerucut',
+            description: 'Selimut kerucut adalah permukaan melengkung yang membentuk bentuk kerucut.',
+            concept: 'Selimut kerucut adalah sisi melengkung yang menghubungkan alas ke titik puncak. Jika dibuka, selimut kerucut akan membentuk juring lingkaran (potongan lingkaran).',
+            formula: 'Luas Selimut = πrs',
+            formulaExplain: 'r adalah jari-jari alas, s adalah garis pelukis (jarak dari puncak ke tepi alas). Rumus ini didapat dari panjang busur juring dikali setengah jari-jari, dimana s bertindak sebagai jari-jari juring tersebut.'
+          },
+          'garis-pelukis': {
+            title: '📏 Garis Pelukis Kerucut',
+            description: 'Garis pelukis adalah garis lurus dari puncak kerucut ke tepi alas.',
+            concept: 'Garis pelukis (s) adalah garis yang menghubungkan puncak kerucut dengan satu titik di tepi lingkaran alas. Garis ini adalah hypotenuse dari segitiga siku-siku yang dibentuk oleh tinggi (t) dan jari-jari (r).',
+            formula: 's = √(r² + t²)',
+            formulaExplain: 'Menggunakan Teorema Pythagoras. Jika kita tarik garis dari puncak ke pusat alas (tinggi = t) dan dari pusat alas ke tepi (jari-jari = r), keduanya membentuk segitiga siku-siku. Garis pelukis adalah sisi miringnya, sehingga s² = r² + t², atau s = √(r² + t²).'
+          }
+        }
+      },
+      sphere: {
+        name: 'Bola',
+        parts: ['permukaan', 'jari-jari', 'diameter'],
+        info: {
+          permukaan: {
+            title: '🌍 Permukaan Bola',
+            description: 'Permukaan bola adalah seluruh bagian luar dari bola.',
+            concept: 'Bola adalah bangun ruang yang terbentuk dari rotasi setengah lingkaran. Setiap titik pada permukaan bola memiliki jarak yang sama dari pusat bola. Tidak ada titik yang lebih tinggi atau lebih rendah dari yang lain.',
+            formula: 'Luas Permukaan = 4πr²',
+            formulaExplain: 'Permukaan bola dapat dianggap sebagai 4 lingkaran besar. Setiap lingkaran besar memiliki luas πr², sehingga luas permukaan bola = 4 × πr² = 4πr².'
+          },
+          'jari-jari': {
+            title: '📏 Jari-jari Bola',
+            description: 'Jari-jari bola adalah jarak dari pusat bola ke permukaan bola.',
+            concept: 'Jari-jari (r) adalah garis yang menghubungkan pusat bola dengan sembarang titik di permukaan bola. Semua jari-jari bola memiliki panjang yang sama.',
+            formula: 'r = setengah diameter',
+            formulaExplain: 'Jika diameter bola adalah d, maka jari-jari adalah r = d/2. Jari-jari adalah jarak dari pusat, sedangkan diameter adalah jarak melintasi bola melalui pusat.'
+          },
+          diameter: {
+            title: '⭕ Diameter Bola',
+            description: 'Diameter bola adalah garis lurus yang melewati pusat bola dari satu sisi ke sisi lain.',
+            concept: 'Diameter (d) adalah garis terpanjang yang dapat ditarik pada bola, selalu melewati pusat. Diameter adalah dua kali jari-jari.',
+            formula: 'd = 2r',
+            formulaExplain: 'Diameter adalah dua kali jari-jari karena diameter memanjang dari satu sisi permukaan ke sisi lain melalui pusat, sementara jari-jari hanya dari pusat ke permukaan.'
+          }
+        }
+      }
+    };
+
+    const quizDatabase = {
+      cylinder: [
+        // MUDAH
+        { difficulty: 'mudah', question: 'Sebuah tabung memiliki jari-jari 7 cm. Berapa luas alas tabung? (π = 22/7)', options: ['154 cm²', '220 cm²', '308 cm²', '77 cm²'], correct: 0, explanation: 'Luas Alas = πr² = (22/7) × 7² = (22/7) × 49 = 22 × 7 = 154 cm²', solution: 'Langkah 1: Identifikasi r = 7 cm\nLangkah 2: Gunakan rumus Luas Alas = πr²\nLangkah 3: Substitusi nilai: L = (22/7) × 7²\nLangkah 4: Hitung: L = (22/7) × 49 = 154 cm²' },
+        { difficulty: 'mudah', question: 'Berapakah tinggi tabung jika volumenya 1540 cm³ dan jari-jarinya 7 cm? (π = 22/7)', options: ['10 cm', '15 cm', '20 cm', '5 cm'], correct: 0, explanation: 'Volume = πr²t → 1540 = (22/7) × 49 × t → 1540 = 154t → t = 10 cm', solution: 'Langkah 1: Gunakan rumus Volume = πr²t\nLangkah 2: Masukkan nilai: 1540 = (22/7) × 7² × t\nLangkah 3: Hitung luas alas: (22/7) × 49 = 154\nLangkah 4: Selesaikan: 1540 = 154t → t = 1540 ÷ 154 = 10 cm' },
+
+        // SEDANG
+        { difficulty: 'sedang', question: 'Luas selimut tabung dengan jari-jari 5 cm dan tinggi 12 cm adalah? (π = 3,14)', options: ['188,4 cm²', '314 cm²', '376,8 cm²', '628 cm²'], correct: 2, explanation: 'Luas Selimut = 2πrt = 2 × 3,14 × 5 × 12 = 376,8 cm²', solution: 'Langkah 1: Identifikasi r = 5 cm, t = 12 cm, π = 3,14\nLangkah 2: Gunakan rumus Luas Selimut = 2πrt\nLangkah 3: Substitusi: L = 2 × 3,14 × 5 × 12\nLangkah 4: Hitung: L = 6,28 × 60 = 376,8 cm²' },
+        { difficulty: 'sedang', question: 'Luas permukaan tabung dengan r = 6 cm dan t = 8 cm adalah? (π = 3,14)', options: ['527,52 cm²', '614,96 cm²', '703,36 cm²', '791,28 cm²'], correct: 0, explanation: 'Luas Permukaan = 2πr² + 2πrt = 2(3,14)(36) + 2(3,14)(6)(8) = 226,08 + 301,44 = 527,52 cm²', solution: 'Langkah 1: Rumus Luas Permukaan = 2πr(r+t) atau 2πr² + 2πrt\nLangkah 2: Hitung luas dua alas = 2πr² = 2 × 3,14 × 6² = 226,08 cm²\nLangkah 3: Hitung luas selimut = 2πrt = 2 × 3,14 × 6 × 8 = 301,44 cm²\nLangkah 4: Total = 226,08 + 301,44 = 527,52 cm²' },
+
+        // SULIT
+        { difficulty: 'sulit', question: 'Dua tabung mempunyai jari-jari sama 5 cm. Tabung A tingginya 10 cm, tabung B tingginya 20 cm. Jika luas selimut tabung A adalah 314 cm², berapakah luas selimut tabung B? (π = 3,14)', options: ['314 cm²', '628 cm²', '942 cm²', '1256 cm²'], correct: 1, explanation: 'Luas selimut A = 2πrt = 2(3,14)(5)(10) = 314 cm². Luas selimut B = 2πrt = 2(3,14)(5)(20) = 628 cm²', solution: 'Langkah 1: Karena r sama dan t berbeda, luas selimut berbanding lurus dengan t\nLangkah 2: Luas selimut A = 2πrt = 2 × 3,14 × 5 × 10 = 314 cm²\nLangkah 3: Luas selimut B = 2πrt = 2 × 3,14 × 5 × 20 = 628 cm²\nAlternatif: Karena t tabung B = 2 × t tabung A, maka L.selimut B = 2 × L.selimut A = 2 × 314 = 628 cm²' },
+
+        // SOAL CERITA
+        { difficulty: 'sulit', question: 'Sebuah drum berbentuk tabung memiliki diameter 70 cm dan tinggi 1 meter. Berapa volume air yang dapat ditampung drum tersebut? (π = 22/7)', options: ['385 liter', '3850 liter', '38500 liter', '3.850 liter'], correct: 1, explanation: 'r = 35 cm, t = 100 cm. V = πr²t = (22/7) × 35² × 100 = (22/7) × 1225 × 100 = 3.850.000 cm³ = 3850 liter', solution: 'Langkah 1: Ubah satuan: diameter = 70 cm → r = 35 cm, tinggi = 1 m = 100 cm\nLangkah 2: Gunakan rumus Volume = πr²t\nLangkah 3: V = (22/7) × 35² × 100 = (22/7) × 1225 × 100\nLangkah 4: V = (22 × 1225 × 100) ÷ 7 = 2.695.000 ÷ 7 = 3.850.000 cm³\nLangkah 5: Ubah ke liter: 3.850.000 cm³ = 3.850 liter' }
+      ],
+      cone: [
+        // MUDAH
+        { difficulty: 'mudah', question: 'Sebuah kerucut memiliki jari-jari 7 cm. Berapa luas alas kerucut? (π = 22/7)', options: ['154 cm²', '220 cm²', '308 cm²', '77 cm²'], correct: 0, explanation: 'Luas Alas = πr² = (22/7) × 7² = 154 cm²', solution: 'Langkah 1: r = 7 cm, π = 22/7\nLangkah 2: Luas Alas = πr² = (22/7) × 49 = 154 cm²' },
+        { difficulty: 'mudah', question: 'Sebuah kerucut memiliki jari-jari 6 cm dan tinggi 8 cm. Berapa garis pelukisnya?', options: ['10 cm', '12 cm', '14 cm', '16 cm'], correct: 0, explanation: 's = √(r² + t²) = √(6² + 8²) = √(36 + 64) = √100 = 10 cm', solution: 'Langkah 1: r = 6 cm, t = 8 cm\nLangkah 2: Gunakan rumus s = √(r² + t²) dari Teorema Pythagoras\nLangkah 3: s = √(36 + 64) = √100 = 10 cm' },
+
+        // SEDANG
+        { difficulty: 'sedang', question: 'Luas selimut kerucut dengan jari-jari 5 cm dan garis pelukis 13 cm adalah? (π = 3,14)', options: ['157 cm²', '204,1 cm²', '251,2 cm²', '314 cm²'], correct: 1, explanation: 'Luas Selimut = πrs = 3,14 × 5 × 13 = 204,1 cm²', solution: 'Langkah 1: r = 5 cm, s = 13 cm\nLangkah 2: Gunakan rumus Luas Selimut = πrs\nLangkah 3: L = 3,14 × 5 × 13 = 204,1 cm²' },
+        { difficulty: 'sedang', question: 'Luas permukaan kerucut dengan r = 7 cm dan s = 25 cm adalah? (π = 22/7)', options: ['176 cm²', '528 cm²', '704 cm²', '880 cm²'], correct: 2, explanation: 'L.Permukaan = πr² + πrs = (22/7)(49) + (22/7)(7)(25) = 154 + 550 = 704 cm²', solution: 'Langkah 1: Luas Permukaan = Luas Alas + Luas Selimut = πr² + πrs\nLangkah 2: Luas Alas = (22/7) × 49 = 154 cm²\nLangkah 3: Luas Selimut = (22/7) × 7 × 25 = 22 × 25 = 550 cm²\nLangkah 4: Total = 154 + 550 = 704 cm²' },
+
+        // SULIT
+        { difficulty: 'sulit', question: 'Volume kerucut adalah 314 cm³ dengan jari-jari 5 cm. Berapakah tinggi kerucut? (π = 3,14)', options: ['6 cm', '12 cm', '18 cm', '24 cm'], correct: 1, explanation: 'V = (1/3)πr²t → 314 = (1/3)(3,14)(25)t → 314 = 26,17t → t ≈ 12 cm', solution: 'Langkah 1: Gunakan rumus Volume = (1/3)πr²t\nLangkah 2: 314 = (1/3) × 3,14 × 5² × t\nLangkah 3: 314 = (1/3) × 3,14 × 25 × t = 26,17t\nLangkah 4: t = 314 ÷ 26,17 ≈ 12 cm' },
+
+        // SOAL CERITA
+        { difficulty: 'sulit', question: 'Sebuah es krim berbentuk kerucut memiliki diameter alas 4 cm dan tinggi 10 cm. Berapa volume es krim tersebut? (π = 3,14)', options: ['41,87 cm³', '125,6 cm³', '251,2 cm³', '628 cm³'], correct: 0, explanation: 'r = 2 cm, t = 10 cm. V = (1/3)πr²t = (1/3) × 3,14 × 4 × 10 = 41,87 cm³', solution: 'Langkah 1: diameter = 4 cm → r = 2 cm, t = 10 cm\nLangkah 2: Volume = (1/3)πr²t = (1/3) × 3,14 × 2² × 10\nLangkah 3: V = (1/3) × 3,14 × 4 × 10 = (1/3) × 125,6 = 41,87 cm³' }
+      ],
+      sphere: [
+        // MUDAH
+        { difficulty: 'mudah', question: 'Luas permukaan bola dengan r = 7 cm adalah? (π = 22/7)', options: ['154 cm²', '308 cm²', '616 cm²', '924 cm²'], correct: 2, explanation: 'Luas Permukaan = 4πr² = 4 × (22/7) × 49 = 616 cm²', solution: 'Langkah 1: r = 7 cm, π = 22/7\nLangkah 2: L.Permukaan = 4πr² = 4 × (22/7) × 7²\nLangkah 3: L = 4 × (22/7) × 49 = 4 × 154 = 616 cm²' },
+        { difficulty: 'mudah', question: 'Jika luas permukaan bola 1256 cm² dan π = 3,14, berapa jari-jarinya?', options: ['5 cm', '10 cm', '15 cm', '20 cm'], correct: 1, explanation: '4πr² = 1256 → 4(3,14)r² = 1256 → 12,56r² = 1256 → r² = 100 → r = 10 cm', solution: 'Langkah 1: Gunakan rumus Luas = 4πr²\nLangkah 2: 1256 = 4 × 3,14 × r²\nLangkah 3: 1256 = 12,56 × r²\nLangkah 4: r² = 1256 ÷ 12,56 = 100\nLangkah 5: r = √100 = 10 cm' },
+
+        // SEDANG
+        { difficulty: 'sedang', question: 'Volume bola dengan r = 10 cm adalah? (π = 3,14)', options: ['1256 cm³', '2512 cm³', '4186,7 cm³', '6283,2 cm³'], correct: 2, explanation: 'Volume = (4/3)πr³ = (4/3) × 3,14 × 1000 = 4186,7 cm³', solution: 'Langkah 1: r = 10 cm, π = 3,14\nLangkah 2: Volume = (4/3)πr³ = (4/3) × 3,14 × 10³\nLangkah 3: V = (4/3) × 3,14 × 1000\nLangkah 4: V = 4,19 × 1000 = 4186,7 cm³' },
+        { difficulty: 'sedang', question: 'Luas permukaan bola dengan r = 5 cm adalah? (π = 3,14)', options: ['314 cm²', '523,3 cm²', '654,3 cm²', '785 cm²'], correct: 0, explanation: 'Luas Permukaan = 4πr² = 4 × 3,14 × 25 = 314 cm²', solution: 'Langkah 1: r = 5 cm\nLangkah 2: L = 4πr² = 4 × 3,14 × 5²\nLangkah 3: L = 4 × 3,14 × 25 = 314 cm²' },
+
+        // SULIT
+        { difficulty: 'sulit', question: 'Bola A memiliki r = 3 cm dan bola B memiliki r = 6 cm. Berapa perbandingan volume A dan B?', options: ['1:2', '1:4', '1:8', '1:16'], correct: 2, explanation: 'V ∝ r³, jadi V_A : V_B = 3³ : 6³ = 27 : 216 = 1 : 8', solution: 'Langkah 1: Volume = (4/3)πr³, jadi volume berbanding dengan r³\nLangkah 2: V_A : V_B = r_A³ : r_B³ = 3³ : 6³\nLangkah 3: V_A : V_B = 27 : 216\nLangkah 4: Sederhanakan: 27 : 216 = 1 : 8' },
+
+        // SOAL CERITA
+        { difficulty: 'sulit', question: 'Sebuah bola basket memiliki diameter 24 cm. Berapa volume udara yang dapat ditampung bola tersebut? (π = 3,14)', options: ['2304 cm³', '7234 cm³', '7238,4 cm³', '28953,6 cm³'], correct: 3, explanation: 'r = 12 cm. V = (4/3)πr³ = (4/3) × 3,14 × 1728 = 7238,4 cm³', solution: 'Langkah 1: diameter = 24 cm → r = 12 cm\nLangkah 2: Volume = (4/3)πr³ = (4/3) × 3,14 × 12³\nLangkah 3: V = (4/3) × 3,14 × 1728\nLangkah 4: V = 4,19 × 1728 = 7238,4 cm³' }
+      ]
+    };
+
+    // ====== STATE ======
+    let scene, camera, renderer, mesh;
+    let currentShape = 'cylinder';
+    let currentPart = null;
+    let quizState = {
+      currentQuestion: 0,
+      score: 0,
+      selectedAnswer: null,
+      answered: false,
+      questions: []
+    };
+
+    // ====== THREE.JS ======
+    function initThreeJS() {
+      const canvas = document.getElementById('canvas');
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setClearColor(0xf5f5f5);
+      camera.position.z = 3;
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(5, 5, 5);
+      scene.add(directionalLight);
+
+      drawShape();
+      animate();
+      setupZoomButtons();
+    }
+
+    function setupZoomButtons() {
+      const zoomControls = document.getElementById('zoomControls');
+      zoomControls.innerHTML = '';
+      const parts = shapeData[currentShape].parts;
+      
+      parts.forEach(part => {
+        const btn = document.createElement('button');
+        btn.className = 'zoom-btn';
+        btn.textContent = part.charAt(0).toUpperCase() + part.slice(1);
+        btn.onclick = () => zoomPart(part);
+        zoomControls.appendChild(btn);
+      });
+    }
+
+    function drawShape() {
+      if (mesh) scene.remove(mesh);
+      
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x667eea,
+        shininess: 100,
+        wireframe: false
+      });
+
+      let geometry;
+      if (currentShape === 'cylinder') {
+        geometry = new THREE.CylinderGeometry(1, 1, 2, 32);
+      } else if (currentShape === 'cone') {
+        geometry = new THREE.ConeGeometry(1, 2, 32);
+      } else if (currentShape === 'sphere') {
+        geometry = new THREE.SphereGeometry(1, 32, 32);
+      }
+
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = 0.3;
+      mesh.rotation.z = 0.2;
+      scene.add(mesh);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (mesh) {
+        mesh.rotation.x += 0.005;
+        mesh.rotation.z += 0.003;
+      }
+      renderer.render(scene, camera);
+    }
+
+    function selectShape(shape) {
+      currentShape = shape;
+      currentPart = null;
+      document.querySelectorAll('.shape-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      drawShape();
+      updateInfo();
+      setupZoomButtons();
+      generateNewQuiz();
+    }
+
+    function zoomPart(part) {
+      currentPart = part;
+      document.querySelectorAll('.zoom-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      updateInfo();
+    }
+
+    function updateInfo() {
+      if (!currentPart) {
+        document.getElementById('partTitle').textContent = 'Pilih bagian untuk mempelajari';
+        document.getElementById('partDescription').textContent = 'Klik salah satu tombol di atas untuk mempelajari konsep dan rumus bagian tertentu.';
+        document.getElementById('formulaBox').style.display = 'none';
+        document.getElementById('conceptBox').style.display = 'none';
+        return;
+      }
+
+      const info = shapeData[currentShape].info[currentPart];
+      document.getElementById('partTitle').textContent = info.title;
+      document.getElementById('partDescription').textContent = info.description;
+      document.getElementById('formulaBox').textContent = info.formula;
+      document.getElementById('formulaBox').style.display = 'block';
+      document.getElementById('conceptText').innerHTML = `<strong>Penjelasan:</strong> ${info.concept}<br><br><strong>Bagaimana rumusnya:</strong> ${info.formulaExplain}`;
+      document.getElementById('conceptBox').style.display = 'block';
+    }
+
+    // ====== QUIZ ======
+    function generateNewQuiz() {
+      const allQuestions = quizDatabase[currentShape] || [];
+      const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+      quizState = {
+        currentQuestion: 0,
+        score: 0,
+        selectedAnswer: null,
+        answered: false,
+        questions: shuffled.slice(0, 10)
+      };
+      document.getElementById('resultsSection').classList.add('hidden');
+      displayQuestion();
+    }
+
+    function displayQuestion() {
+      const q = quizState.questions[quizState.currentQuestion];
+      const difficultyClass = `difficulty-${q.difficulty}`;
+      const difficultyLabel = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+
+      let html = `<div class="question">
+        <span class="difficulty-badge ${difficultyClass}">Tingkat: ${difficultyLabel}</span>
+        <h3>${q.question}</h3>
+        <div class="options">`;
+
+      q.options.forEach((option, index) => {
+        html += `<label class="option">
+          <input type="radio" name="answer" value="${index}" onchange="selectAnswer(${index})" ${quizState.answered ? 'disabled' : ''}>
+          <span>${String.fromCharCode(65 + index)}. ${option}</span>
+        </label>`;
+      });
+
+      html += '</div>';
+
+      if (quizState.answered) {
+        const isCorrect = quizState.selectedAnswer === q.correct;
+        const feedbackClass = isCorrect ? 'correct' : 'incorrect';
+        const feedbackText = isCorrect ? '✅ Jawaban Benar!' : '❌ Jawaban Salah!';
+        html += `<div class="feedback show ${feedbackClass}">
+          <strong>${feedbackText}</strong>
+          <div class="solution-steps">
+            <strong>Penjelasan:</strong> ${q.explanation}
+            <br><br>
+            <strong>Langkah Pengerjaan:</strong>
+            <br>${q.solution.replace(/\n/g, '<br>')}
+          </div>
+        </div>`;
+      }
+
+      html += '</div>';
+      document.getElementById('quizContent').innerHTML = html;
+      document.getElementById('questionCounter').textContent = `Soal ${quizState.currentQuestion + 1} dari ${quizState.questions.length}`;
+      document.getElementById('progressBar').style.width = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100 + '%';
+      document.getElementById('nextBtn').disabled = !quizState.answered;
+    }
+
+    function selectAnswer(index) {
+      if (quizState.answered) return;
+      quizState.selectedAnswer = index;
+      quizState.answered = true;
+
+      if (index === quizState.questions[quizState.currentQuestion].correct) {
+        quizState.score++;
+      }
+
+      document.querySelectorAll('.option').forEach((opt, i) => {
+        if (i === quizState.questions[quizState.currentQuestion].correct) {
+          opt.classList.add('correct');
+        }
+        if (i === index && index !== quizState.questions[quizState.currentQuestion].correct) {
+          opt.classList.add('incorrect');
+        }
+      });
+
+      document.getElementById('nextBtn').disabled = false;
+      displayQuestion();
+    }
+
+    function nextQuestion() {
+      quizState.currentQuestion++;
+      if (quizState.currentQuestion < quizState.questions.length) {
+        quizState.selectedAnswer = null;
+        quizState.answered = false;
+        displayQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      const percentage = (quizState.score / quizState.questions.length) * 100;
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const messageEl = document.getElementById('resultMessage');
+
+      scoreDisplay.textContent = `${quizState.score}/${quizState.questions.length}`;
+
+      if (percentage === 100) {
+        scoreDisplay.classList = 'score-display excellent';
+        messageEl.textContent = '🌟 Sempurna! Anda menguasai materi ini dengan sangat baik!';
+      } else if (percentage >= 80) {
+        scoreDisplay.classList = 'score-display excellent';
+        messageEl.textContent = '🎉 Luar biasa! Anda memahami materi dengan baik!';
+      } else if (percentage >= 60) {
+        scoreDisplay.classList = 'score-display good';
+        messageEl.textContent = '👍 Bagus! Terus belajar untuk hasil yang lebih baik!';
+      } else if (percentage >= 40) {
+        scoreDisplay.classList = 'score-display fair';
+        messageEl.textContent = '📚 Perlu lebih banyak latihan. Ulangi kembali materinya!';
+      } else {
+        scoreDisplay.classList = 'score-display poor';
+        messageEl.textContent = '💪 Jangan menyerah! Pelajari kembali konsep dasarnya!';
+      }
+
+      document.getElementById('quizContainer').classList.add('hidden');
+      document.getElementById('resultsSection').classList.remove('hidden');
+    }
+
+    function resetQuiz() {
+      document.getElementById('quizContainer').classList.remove('hidden');
+      generateNewQuiz();
+    }
+
+    // ====== QR CODE ======
+    function generateSessionCode() {
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(7).toUpperCase();
+      return `${random}-${timestamp.toString().slice(-4)}`;
+    }
+
+    function generateQRCode() {
+      const sessionCode = generateSessionCode();
+      const url = window.location.href.split('?')[0] + '?session=' + sessionCode;
+
+      document.getElementById('sessionCode').textContent = sessionCode;
+      document.getElementById('qrCode').innerHTML = '';
+
+      if (typeof QRCode !== 'undefined') {
+        QRCode.toCanvas(document.getElementById('qrCode'), url, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#667eea',
+            light: '#ffffff'
+          }
+        }, (error) => {
+          if (error) console.error(error);
+        });
+      }
+    }
+
+    function generateNewQR() {
+      generateQRCode();
+    }
+
+    // ====== INIT ======
+    window.addEventListener('load', () => {
+      initThreeJS();
+      updateInfo();
+      generateNewQuiz();
+      generateQRCode();
+
+      window.addEventListener('resize', () => {
+        const canvas = document.getElementById('canvas');
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      });
+    });
+  </script>
+</body>
+</html>
